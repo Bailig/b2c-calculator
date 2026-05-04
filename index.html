@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ground Transportation Finance Suite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:          #F5F2EC;
+    --surface:     #FFFFFF;
+    --surface-alt: #F9F7F3;
+    --ink:         #1C1917;
+    --ink-mid:     #44403C;
+    --ink-soft:    #78716C;
+    --ink-faint:   #A8A29E;
+    --border:      #E2DDD6;
+    --border-dark: #C9C3BA;
+    --green:       #16653A;
+    --green-mid:   #2A8754;
+    --green-light: #D1EAD9;
+    --green-xlight:#EDF7F1;
+    --gold:        #B07D1A;
+    --gold-light:  #F5EDDA;
+    --gold-mid:    #D4A84B;
+    --red:         #B5232A;
+    --red-light:   #FCEAEB;
+    --amber:       #9A5C0C;
+    --amber-light: #FEF3E2;
+    --blue:        #2B5FA0;
+    --shadow-sm:   0 1px 3px rgba(28,25,23,0.07), 0 4px 12px rgba(28,25,23,0.04);
+    --shadow-md:   0 2px 8px rgba(28,25,23,0.08), 0 8px 24px rgba(28,25,23,0.06);
+    --radius:      12px;
+    --radius-sm:   6px;
+  }
+
+  html { font-size: 15px; scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ─── TOP NAV ─── */
+  .top-nav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: stretch;
+    padding: 0 2rem;
+    height: 56px;
+    gap: 0;
+  }
+
+  .nav-brand {
+    font-family: 'DM Serif Display', serif;
+    font-size: 16px;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    padding-right: 2rem;
+    margin-right: 1rem;
+    border-right: 1px solid var(--border);
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .nav-brand em { font-style: italic; color: var(--green-mid); }
+
+  .nav-tabs {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    flex: 1;
+  }
+
+  .nav-tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 1.25rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ink-soft);
+    border-bottom: 2px solid transparent;
+    transition: color .15s, border-color .15s;
+    white-space: nowrap;
+  }
+  .nav-tab:hover { color: var(--ink); }
+  .nav-tab.active {
+    color: var(--ink);
+    font-weight: 500;
+    border-bottom-color: var(--ink);
+  }
+
+  .nav-tab-icon {
+    width: 20px; height: 20px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    flex-shrink: 0;
+    transition: background .15s;
+  }
+  .nav-tab:nth-child(1) .nav-tab-icon { background: var(--green-xlight); color: var(--green); }
+  .nav-tab:nth-child(2) .nav-tab-icon { background: #EEF3FB; color: var(--blue); }
+  .nav-tab:nth-child(3) .nav-tab-icon { background: var(--gold-light); color: var(--gold); }
+  .nav-tab.active:nth-child(1) .nav-tab-icon { background: var(--green-light); }
+  .nav-tab.active:nth-child(2) .nav-tab-icon { background: #D8E7FF; }
+  .nav-tab.active:nth-child(3) .nav-tab-icon { background: #EDD9A0; }
+
+  /* ─── PAGE VIEWS ─── */
+  .page { display: none; }
+  .page.visible { display: block; }
+
+  /* ─── SHARED COMPONENTS ─── */
+  .page-header {
+    border-bottom: 1px solid var(--border);
+    padding: 2rem 2.5rem 1.75rem;
+    background: var(--surface);
+  }
+  .page-header-tag {
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 0.5rem;
+    font-family: 'DM Mono', monospace;
+  }
+  .page-header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(24px, 3.5vw, 36px);
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 0.4rem;
+  }
+  .page-header h1 em { font-style: italic; color: var(--green-mid); }
+  .page-header p {
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    font-weight: 300;
+    max-width: 540px;
+  }
+
+  .content-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 2rem 4rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+  }
+  .card-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .card-body { padding: 1.5rem; }
+
+  /* ─── SLIDERS ─── */
+  .field { margin-bottom: 1rem; }
+  .field:last-child { margin-bottom: 0; }
+  .field-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.35rem;
+    gap: 0.5rem;
+  }
+  .field-label {
+    font-size: 13px;
+    color: var(--ink-mid);
+    font-weight: 400;
+    line-height: 1.3;
+  }
+  .field-label small {
+    display: block;
+    font-size: 11px;
+    color: var(--ink-faint);
+    font-weight: 300;
+    margin-top: 1px;
+  }
+  .field-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    min-width: 64px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 15px; height: 15px;
+    border-radius: 50%;
+    background: var(--ink);
+    cursor: pointer;
+    border: 2.5px solid #fff;
+    box-shadow: 0 0 0 1.5px var(--ink);
+    transition: transform .15s;
+  }
+  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.25); }
+  input[type="range"]::-moz-range-thumb {
+    width: 15px; height: 15px;
+    border-radius: 50%;
+    background: var(--ink);
+    border: 2.5px solid #fff;
+    box-shadow: 0 0 0 1.5px var(--ink);
+  }
+  .range-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+  }
+  .range-labels span {
+    font-size: 10px;
+    color: var(--ink-faint);
+    font-family: 'DM Mono', monospace;
+  }
+
+  hr.sec { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+
+  /* ─── FOOTER ─── */
+  .page-footer {
+    text-align: center;
+    padding: 1.5rem;
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    border-top: 1px solid var(--border);
+    font-family: 'DM Mono', monospace;
+    background: var(--surface);
+    margin-top: 2rem;
+  }
+
+  /* ═══════════════════════════════════
+     PAGE 1 — TRANSFER PRICING
+  ═══════════════════════════════════ */
+  #page-transfer .content-wrap {
+    max-width: 980px;
+  }
+
+  .tp-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-sm);
+  }
+  .tp-summary-cell {
+    background: var(--surface);
+    padding: 1.25rem 1.25rem;
+    transition: background .2s;
+  }
+  .tp-summary-cell.accent { background: var(--ink); }
+  .tp-summary-cell.danger { background: var(--red-light); }
+  .tp-s-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 0.5rem;
+  }
+  .tp-summary-cell.accent .tp-s-label { color: rgba(255,255,255,.45); }
+  .tp-summary-cell.danger .tp-s-label { color: var(--red); }
+  .tp-s-val {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.7rem;
+    font-weight: 400;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .tp-summary-cell.accent .tp-s-val { color: #fff; }
+  .tp-summary-cell.danger .tp-s-val { color: var(--red); }
+
+  .tp-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+  .tp-full { grid-column: 1 / -1; }
+
+  /* Insurance */
+  .ins-layer {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0 0.75rem;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  .ins-layer:last-child { margin-bottom: 0; }
+  .ins-layer-label { font-size: 12.5px; color: var(--ink-mid); }
+  .ins-layer-vals { text-align: right; white-space: nowrap; }
+  .ins-layer-annual {
+    font-family: 'DM Mono', monospace;
+    font-size: 12.5px; font-weight: 500; color: var(--ink);
+  }
+  .ins-layer-per-ride {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; color: var(--ink-faint); margin-top: 1px;
+  }
+  .ins-total-bar {
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.6rem 0.875rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    font-size: 12.5px;
+    color: var(--ink-mid);
+  }
+  .ins-total-bar strong {
+    font-family: 'DM Mono', monospace;
+    font-weight: 500; color: var(--ink);
+  }
+
+  /* Waterfall */
+  .wf-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.6rem;
+    font-size: 13px;
+  }
+  .wf-label { color: var(--ink-mid); flex: 1; }
+  .wf-track {
+    width: 180px; height: 6px;
+    background: var(--surface-alt);
+    border-radius: 3px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .wf-fill { height: 100%; border-radius: 3px; transition: width .25s ease; }
+  .wf-amt {
+    font-family: 'DM Mono', monospace;
+    font-size: 12.5px; font-weight: 500;
+    min-width: 72px; text-align: right;
+  }
+  .wf-pct {
+    font-size: 11px; color: var(--ink-faint);
+    min-width: 36px; text-align: right;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .incident-box {
+    background: var(--gold-light);
+    border-left: 3px solid var(--gold-mid);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 0.875rem 1.25rem;
+    font-size: 12.5px;
+    color: var(--ink-mid);
+    line-height: 1.8;
+  }
+  .incident-box strong { font-weight: 500; color: var(--ink); }
+
+  /* ═══════════════════════════════════
+     PAGE 2 — REVENUE PROJECTION
+  ═══════════════════════════════════ */
+  .rp-phase-nav {
+    display: flex;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--surface);
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-sm);
+  }
+  .rp-phase-tab {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+    border-right: 1px solid var(--border);
+    transition: background .15s;
+  }
+  .rp-phase-tab:last-child { border-right: none; }
+  .rp-phase-tab:hover { background: var(--bg); }
+  .rp-phase-tab.active { background: var(--green); }
+  .rp-tab-year {
+    font-size: 10px; font-weight: 500;
+    letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink-faint); display: block; margin-bottom: 2px;
+  }
+  .rp-phase-tab.active .rp-tab-year { color: rgba(255,255,255,.55); }
+  .rp-tab-label {
+    font-family: 'DM Serif Display', serif;
+    font-size: 16px; color: var(--ink); display: block;
+  }
+  .rp-phase-tab.active .rp-tab-label { color: #fff; }
+  .rp-tab-rev {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px; color: var(--green-mid); display: block; margin-top: 2px;
+  }
+  .rp-phase-tab.active .rp-tab-rev { color: var(--green-light); }
+
+  .rp-phase-body { display: none; }
+  .rp-phase-body.visible { display: block; }
+
+  .rp-phase-grid {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .rp-metric-stack { display: flex; flex-direction: column; gap: 1rem; }
+
+  .rp-metric {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    box-shadow: var(--shadow-sm);
+    position: relative; overflow: hidden;
+  }
+  .rp-metric.primary { background: var(--green); border-color: var(--green); }
+  .rp-metric.secondary { background: var(--green-xlight); border-color: var(--green-light); }
+  .rp-metric-label {
+    font-size: 10.5px; font-weight: 500; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px;
+  }
+  .rp-metric.primary .rp-metric-label { color: rgba(255,255,255,.55); }
+  .rp-metric.secondary .rp-metric-label { color: var(--green); }
+  .rp-metric-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px; line-height: 1;
+    color: var(--ink); letter-spacing: -.02em;
+  }
+  .rp-metric.primary .rp-metric-value { color: #fff; }
+  .rp-metric.secondary .rp-metric-value { color: var(--green); }
+  .rp-metric-sub { font-size: 12px; color: var(--ink-soft); margin-top: 5px; }
+  .rp-metric.primary .rp-metric-sub { color: rgba(255,255,255,.5); }
+
+  .rp-metric-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .rp-metric-sm {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    box-shadow: var(--shadow-sm);
+  }
+  .rp-metric-sm .rp-metric-label { margin-bottom: 4px; }
+  .rp-metric-sm .rp-metric-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 20px; font-weight: 500;
+    letter-spacing: -.01em; color: var(--ink);
+  }
+
+  /* Summary section */
+  .rp-section-heading {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px; color: var(--ink);
+    margin-bottom: 1.25rem; letter-spacing: -.01em;
+    margin-top: 2rem;
+  }
+  .rp-summary-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .rp-sum-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.375rem 1.5rem;
+    box-shadow: var(--shadow-sm);
+  }
+  .rp-sum-year {
+    font-size: 10px; font-weight: 500; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--ink-faint); margin-bottom: 3px;
+  }
+  .rp-sum-phase {
+    font-family: 'DM Serif Display', serif;
+    font-size: 15px; color: var(--ink); margin-bottom: 0.75rem;
+  }
+  .rp-sum-rev {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px; letter-spacing: -.02em;
+    color: var(--green); line-height: 1; margin-bottom: 2px;
+  }
+  .rp-sum-gmv { font-size: 12px; color: var(--ink-soft); margin-bottom: 0.875rem; }
+  .rp-sum-stats {
+    border-top: 1px solid var(--border);
+    padding-top: 0.75rem;
+    display: flex; flex-direction: column; gap: 5px;
+  }
+  .rp-sum-stat { display: flex; justify-content: space-between; font-size: 12px; }
+  .rp-sum-stat-k { color: var(--ink-soft); }
+  .rp-sum-stat-v {
+    font-family: 'DM Mono', monospace;
+    font-weight: 500; color: var(--ink);
+  }
+  .rp-chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.75rem 2rem;
+    box-shadow: var(--shadow-sm);
+  }
+  .rp-chart-legend { display: flex; gap: 1.25rem; margin-bottom: 1.25rem; }
+  .rp-legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-mid); }
+  .rp-legend-swatch { width: 12px; height: 12px; border-radius: 3px; }
+  .rp-chart-wrap { position: relative; width: 100%; height: 240px; }
+  .rp-footnote {
+    margin-top: 1.5rem;
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    font-style: italic;
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+  }
+
+  /* Slider styles for Revenue Projection */
+  .rp-slider-row { margin-bottom: 1.25rem; }
+  .rp-slider-row:last-child { margin-bottom: 0; }
+  .rp-slider-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .rp-slider-name { font-size: 13px; color: var(--ink-mid); font-weight: 400; }
+  .rp-slider-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px; font-weight: 500; color: var(--ink);
+  }
+  #page-revenue .card-body input[type="range"]::-webkit-slider-thumb {
+    background: var(--green);
+    box-shadow: 0 0 0 1.5px var(--green);
+  }
+
+  /* ═══════════════════════════════════
+     PAGE 3 — LEAD VALUE
+  ═══════════════════════════════════ */
+  .lv-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .lv-slider-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+  }
+  .lv-slider-label { font-size: 13px; color: var(--ink-mid); font-weight: 400; }
+  .lv-slider-val {
+    font-size: 15px; font-weight: 500; color: var(--ink);
+    font-family: 'DM Serif Display', serif; font-style: italic;
+  }
+
+  #page-lead .card-body input[type="range"]::-webkit-slider-thumb {
+    background: var(--surface);
+    border: 2px solid var(--gold-mid);
+    box-shadow: 0 1px 6px rgba(176,125,26,.25);
+  }
+
+  .lv-metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.625rem;
+  }
+  .lv-metric {
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.875rem 1rem;
+    transition: border-color .2s;
+  }
+  .lv-metric.highlight {
+    background: var(--gold-light);
+    border-color: var(--gold-mid);
+  }
+  .lv-metric-label {
+    font-size: 10.5px; font-weight: 500;
+    letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink-faint); margin-bottom: 4px;
+  }
+  .lv-metric.highlight .lv-metric-label { color: var(--gold); }
+  .lv-metric-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 24px; font-style: italic;
+    color: var(--ink); line-height: 1;
+  }
+  .lv-metric.highlight .lv-metric-value { color: var(--gold); }
+  .lv-metric-sub { font-size: 11px; color: var(--ink-faint); margin-top: 3px; }
+
+  .lv-verdict {
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin-top: 1rem;
+    border: 1px solid;
+    transition: background .3s, border-color .3s;
+  }
+  .lv-verdict.green { background: var(--green-xlight); border-color: #9FD0B2; }
+  .lv-verdict.amber { background: var(--amber-light); border-color: #E8C07A; }
+  .lv-verdict.red   { background: var(--red-light);   border-color: #DCA0A5; }
+  .lv-verdict-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 15px; font-weight: 400; margin-bottom: 5px;
+  }
+  .lv-verdict.green .lv-verdict-title { color: var(--green); }
+  .lv-verdict.amber .lv-verdict-title { color: var(--amber); }
+  .lv-verdict.red   .lv-verdict-title { color: var(--red); }
+  .lv-verdict-body { font-size: 12.5px; line-height: 1.65; }
+  .lv-verdict.green .lv-verdict-body { color: #2D7A58; }
+  .lv-verdict.amber .lv-verdict-body { color: #8C5610; }
+  .lv-verdict.red   .lv-verdict-body { color: #963040; }
+
+  .lv-explainer { display: flex; flex-direction: column; gap: 1rem; }
+  .lv-explainer-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.375rem;
+    box-shadow: var(--shadow-sm);
+  }
+  .lv-explainer-card h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 16px; font-weight: 400;
+    margin-bottom: 0.75rem; color: var(--ink);
+  }
+  .lv-formula {
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem 1rem;
+    font-size: 12px; line-height: 1.9;
+    color: var(--ink-soft);
+    font-family: 'DM Mono', monospace;
+  }
+  .lv-formula strong { color: var(--ink); font-weight: 500; }
+  .lv-rule-list { list-style: none; }
+  .lv-rule-list li {
+    display: flex; gap: 10px;
+    font-size: 12.5px; color: var(--ink-soft);
+    padding: 7px 0; border-bottom: 1px solid var(--border); line-height: 1.5;
+  }
+  .lv-rule-list li:last-child { border-bottom: none; }
+  .lv-badge {
+    flex-shrink: 0; font-size: 10.5px; font-weight: 500;
+    padding: 2px 8px; border-radius: 99px; align-self: flex-start; margin-top: 1px;
+  }
+  .lv-badge-green { background: var(--green-xlight); color: var(--green); }
+  .lv-badge-amber { background: var(--amber-light);  color: var(--amber); }
+  .lv-badge-red   { background: var(--red-light);    color: var(--red); }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 840px) {
+    .top-nav { padding: 0 1rem; }
+    .nav-brand { display: none; }
+    .nav-tab { padding: 0 0.875rem; font-size: 12px; }
+    .page-header { padding: 1.5rem 1.25rem; }
+    .content-wrap { padding: 1.25rem 1rem 3rem; }
+    .tp-grid { grid-template-columns: 1fr; }
+    .tp-full { grid-column: 1; }
+    .tp-summary-grid { grid-template-columns: 1fr 1fr; }
+    .wf-track { width: 100px; }
+    .rp-phase-grid { grid-template-columns: 1fr; }
+    .rp-summary-cards { grid-template-columns: 1fr; }
+    .rp-phase-nav { flex-direction: column; }
+    .rp-phase-tab { border-right: none; border-bottom: 1px solid var(--border); }
+    .rp-phase-tab:last-child { border-bottom: none; }
+    .lv-layout { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="top-nav">
+  <div class="nav-brand">Finance <em>Suite</em></div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('transfer')">
+      <span class="nav-tab-icon">⇌</span>Transfer Pricing
+    </button>
+    <button class="nav-tab" onclick="showPage('revenue')">
+      <span class="nav-tab-icon">↗</span>Revenue Projection
+    </button>
+    <button class="nav-tab" onclick="showPage('lead')">
+      <span class="nav-tab-icon">◎</span>Lead Value
+    </button>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════
+     PAGE 1 — TRANSFER PRICING
+══════════════════════════════════════════════ -->
+<div class="page visible" id="page-transfer">
+  <div class="page-header">
+    <div class="page-header-tag">Unit Economics</div>
+    <h1>Transfer <em>Pricing</em> Calculator</h1>
+    <p>Model cost breakdown per ride — driver payout, payment processing, insurance, and late pick-up reserve.</p>
+  </div>
+  <div class="content-wrap">
+
+    <!-- Summary -->
+    <div class="tp-summary-grid">
+      <div class="tp-summary-cell">
+        <div class="tp-s-label">Customer Price</div>
+        <div class="tp-s-val" id="s-price">$200</div>
+      </div>
+      <div class="tp-summary-cell">
+        <div class="tp-s-label">Total Costs</div>
+        <div class="tp-s-val" id="s-costs">—</div>
+      </div>
+      <div class="tp-summary-cell" id="gp-cell">
+        <div class="tp-s-label">Unit Gross Profit</div>
+        <div class="tp-s-val" id="s-gp">—</div>
+      </div>
+      <div class="tp-summary-cell accent" id="gpm-cell">
+        <div class="tp-s-label">Gross Profit Margin</div>
+        <div class="tp-s-val" id="s-gpm">—</div>
+      </div>
+    </div>
+
+    <div class="tp-grid">
+
+      <!-- Revenue -->
+      <div class="card">
+        <div class="card-title">Revenue</div>
+        <div class="card-body">
+          <div class="field">
+            <div class="field-row">
+              <span class="field-label">Customer price</span>
+              <span class="field-val" id="v-price">$200</span>
+            </div>
+            <input type="range" min="50" max="600" step="5" value="200" id="tp-price" oninput="tpCalc()">
+          </div>
+        </div>
+      </div>
+
+      <!-- Driver Cost -->
+      <div class="card">
+        <div class="card-title">Driver Cost</div>
+        <div class="card-body">
+          <div class="field">
+            <div class="field-row">
+              <span class="field-label">Driver payout<small>% of customer price</small></span>
+              <span class="field-val" id="v-driverPct">65%</span>
+            </div>
+            <input type="range" min="40" max="85" step="1" value="65" id="tp-driverPct" oninput="tpCalc()">
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Processing -->
+      <div class="card">
+        <div class="card-title">Payment Processing</div>
+        <div class="card-body">
+          <div class="field">
+            <div class="field-row">
+              <span class="field-label">Processing rate<small>% of customer price</small></span>
+              <span class="field-val" id="v-procRate">2.9%</span>
+            </div>
+            <input type="range" min="1" max="5" step="0.1" value="2.9" id="tp-procRate" oninput="tpCalc()">
+          </div>
+          <div class="field">
+            <div class="field-row">
+              <span class="field-label">Fixed fee per transaction</span>
+              <span class="field-val" id="v-procFixed">$0.30</span>
+            </div>
+            <input type="range" min="0" max="1" step="0.05" value="0.30" id="tp-procFixed" oninput="tpCalc()">
+          </div>
+        </div>
+      </div>
+
+      <!-- Late Pick-Up -->
+      <div class="card">
+        <div class="card-title">Late Pick-Up Policy</div>
+        <div class="card-body">
+          <div class="field">
+            <div class="field-row">
+              <span class="field-label">Late pick-up rate<small>% of rides that arrive late</small></span>
+              <span class="field-val" id="v-lateRate">3.0%</span>
+            </div>
+            <input type="range" min="0" max="15" step="0.5" value="3" id="tp-lateRate" oninput="tpCalc()">
+          </div>
+          <div class="field">
+            <div class="field-row">
+              <span class="field-label">Driver penalty<small>% of their payout on the late ride</small></span>
+              <span class="field-val" id="v-penaltyPct">20%</span>
+            </div>
+            <input type="range" min="0" max="100" step="5" value="20" id="tp-penaltyPct" oninput="tpCalc()">
+          </div>
+          <hr class="sec">
+          <div class="incident-box" id="incident-desc"></div>
+        </div>
+      </div>
+
+      <!-- Insurance -->
+      <div class="card tp-full">
+        <div class="card-title">Insurance — Annual Premiums per Driver</div>
+        <div class="card-body">
+          <div class="field" style="margin-bottom:1.25rem;">
+            <div class="field-row">
+              <span class="field-label">Rides per driver per year<small>determines per-ride cost for all layers</small></span>
+              <span class="field-val" id="v-rides">1,200</span>
+            </div>
+            <input type="range" min="200" max="3000" step="50" value="1200" id="tp-rides" oninput="tpCalc()">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem 2rem;">
+            <div>
+              <div class="ins-layer">
+                <div>
+                  <div class="ins-layer-label">Layer 1 — TNC / HNOA</div>
+                  <input type="range" min="1000" max="15000" step="250" value="5000" id="tp-ins1" oninput="tpCalc()" style="margin-top:0.4rem;">
+                </div>
+                <div class="ins-layer-vals">
+                  <div class="ins-layer-annual" id="v-ins1">$5,000/yr</div>
+                  <div class="ins-layer-per-ride" id="d-ins1">$4.17/ride</div>
+                </div>
+              </div>
+              <div class="ins-layer">
+                <div>
+                  <div class="ins-layer-label">Layer 2 — Excess Liability</div>
+                  <input type="range" min="500" max="8000" step="250" value="2000" id="tp-ins2" oninput="tpCalc()" style="margin-top:0.4rem;">
+                </div>
+                <div class="ins-layer-vals">
+                  <div class="ins-layer-annual" id="v-ins2">$2,000/yr</div>
+                  <div class="ins-layer-per-ride" id="d-ins2">$1.67/ride</div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="ins-layer">
+                <div>
+                  <div class="ins-layer-label">Layer 3 — General Liability</div>
+                  <input type="range" min="200" max="3000" step="100" value="600" id="tp-ins3" oninput="tpCalc()" style="margin-top:0.4rem;">
+                </div>
+                <div class="ins-layer-vals">
+                  <div class="ins-layer-annual" id="v-ins3">$600/yr</div>
+                  <div class="ins-layer-per-ride" id="d-ins3">$0.50/ride</div>
+                </div>
+              </div>
+              <div class="ins-layer">
+                <div>
+                  <div class="ins-layer-label">Layer 4 — Occ-Acc (Driver)</div>
+                  <input type="range" min="200" max="4000" step="100" value="900" id="tp-ins4" oninput="tpCalc()" style="margin-top:0.4rem;">
+                </div>
+                <div class="ins-layer-vals">
+                  <div class="ins-layer-annual" id="v-ins4">$900/yr</div>
+                  <div class="ins-layer-per-ride" id="d-ins4">$0.75/ride</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="ins-total-bar">
+            <span>Total annual insurance per driver</span>
+            <span><strong id="ins-annual">$8,500</strong> &nbsp;·&nbsp; <strong id="ins-per-ride">$7.08 / ride</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Waterfall -->
+      <div class="card tp-full">
+        <div class="card-title">Cost Breakdown per Ride</div>
+        <div class="card-body" id="waterfall"></div>
+      </div>
+
+    </div>
+  </div>
+  <div class="page-footer">Transfer Pricing Calculator &mdash; For internal use only</div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PAGE 2 — REVENUE PROJECTION
+══════════════════════════════════════════════ -->
+<div class="page" id="page-revenue">
+  <div class="page-header">
+    <div class="page-header-tag">Multi-Year Model</div>
+    <h1>Revenue <em>Projection</em></h1>
+    <p>Model cities, drivers, and rides across three growth phases to forecast platform revenue.</p>
+  </div>
+  <div class="content-wrap">
+
+    <div class="rp-phase-nav" id="rp-phase-nav">
+      <button class="rp-phase-tab active" onclick="rpSwitchPhase(0)">
+        <span class="rp-tab-year">Phase 1</span>
+        <span class="rp-tab-label">Year 1</span>
+        <span class="rp-tab-rev" id="rp-tab-rev-0">—</span>
+      </button>
+      <button class="rp-phase-tab" onclick="rpSwitchPhase(1)">
+        <span class="rp-tab-year">Phase 2</span>
+        <span class="rp-tab-label">Year 2</span>
+        <span class="rp-tab-rev" id="rp-tab-rev-1">—</span>
+      </button>
+      <button class="rp-phase-tab" onclick="rpSwitchPhase(2)">
+        <span class="rp-tab-year">Phase 3</span>
+        <span class="rp-tab-label">Year 3</span>
+        <span class="rp-tab-rev" id="rp-tab-rev-2">—</span>
+      </button>
+    </div>
+
+    <div class="rp-phase-body visible" id="rp-phase-body-0">
+      <div class="rp-phase-grid">
+        <div class="card">
+          <div class="card-title">Input Assumptions</div>
+          <div class="card-body" id="rp-sliders-0"></div>
+        </div>
+        <div class="rp-metric-stack">
+          <div class="rp-metric primary">
+            <div class="rp-metric-label">Platform Revenue</div>
+            <div class="rp-metric-value" id="rp-m-rev-0">—</div>
+            <div class="rp-metric-sub" id="rp-m-rev-sub-0"></div>
+          </div>
+          <div class="rp-metric secondary">
+            <div class="rp-metric-label">Gross Bookings (GMV)</div>
+            <div class="rp-metric-value" id="rp-m-gmv-0">—</div>
+            <div class="rp-metric-sub" id="rp-m-gmv-sub-0"></div>
+          </div>
+          <div class="rp-metric-row">
+            <div class="rp-metric-sm"><div class="rp-metric-label">Total Drivers</div><div class="rp-metric-value" id="rp-m-drv-0">—</div></div>
+            <div class="rp-metric-sm"><div class="rp-metric-label">Annual Rides</div><div class="rp-metric-value" id="rp-m-rds-0">—</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rp-phase-body" id="rp-phase-body-1">
+      <div class="rp-phase-grid">
+        <div class="card">
+          <div class="card-title">Input Assumptions</div>
+          <div class="card-body" id="rp-sliders-1"></div>
+        </div>
+        <div class="rp-metric-stack">
+          <div class="rp-metric primary">
+            <div class="rp-metric-label">Platform Revenue</div>
+            <div class="rp-metric-value" id="rp-m-rev-1">—</div>
+            <div class="rp-metric-sub" id="rp-m-rev-sub-1"></div>
+          </div>
+          <div class="rp-metric secondary">
+            <div class="rp-metric-label">Gross Bookings (GMV)</div>
+            <div class="rp-metric-value" id="rp-m-gmv-1">—</div>
+            <div class="rp-metric-sub" id="rp-m-gmv-sub-1"></div>
+          </div>
+          <div class="rp-metric-row">
+            <div class="rp-metric-sm"><div class="rp-metric-label">Total Drivers</div><div class="rp-metric-value" id="rp-m-drv-1">—</div></div>
+            <div class="rp-metric-sm"><div class="rp-metric-label">Annual Rides</div><div class="rp-metric-value" id="rp-m-rds-1">—</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rp-phase-body" id="rp-phase-body-2">
+      <div class="rp-phase-grid">
+        <div class="card">
+          <div class="card-title">Input Assumptions</div>
+          <div class="card-body" id="rp-sliders-2"></div>
+        </div>
+        <div class="rp-metric-stack">
+          <div class="rp-metric primary">
+            <div class="rp-metric-label">Platform Revenue</div>
+            <div class="rp-metric-value" id="rp-m-rev-2">—</div>
+            <div class="rp-metric-sub" id="rp-m-rev-sub-2"></div>
+          </div>
+          <div class="rp-metric secondary">
+            <div class="rp-metric-label">Gross Bookings (GMV)</div>
+            <div class="rp-metric-value" id="rp-m-gmv-2">—</div>
+            <div class="rp-metric-sub" id="rp-m-gmv-sub-2"></div>
+          </div>
+          <div class="rp-metric-row">
+            <div class="rp-metric-sm"><div class="rp-metric-label">Total Drivers</div><div class="rp-metric-value" id="rp-m-drv-2">—</div></div>
+            <div class="rp-metric-sm"><div class="rp-metric-label">Annual Rides</div><div class="rp-metric-value" id="rp-m-rds-2">—</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="rp-section-heading">Three-Year Overview</h2>
+    <div class="rp-summary-cards" id="rp-summary-cards"></div>
+
+    <div class="rp-chart-card">
+      <div class="rp-chart-legend">
+        <div class="rp-legend-item"><span class="rp-legend-swatch" style="background:var(--green);"></span>Platform revenue</div>
+        <div class="rp-legend-item"><span class="rp-legend-swatch" style="background:var(--green-light);"></span>GMV (gross bookings)</div>
+      </div>
+      <div class="rp-chart-wrap">
+        <canvas id="rp-chart" role="img" aria-label="Revenue projection bar chart"></canvas>
+      </div>
+    </div>
+
+    <p class="rp-footnote">Projections are illustrative. Assumes consistent utilization across all operating days (365). Adjust assumptions to reflect seasonal demand, ramp-up periods, and market-specific pricing.</p>
+
+  </div>
+  <div class="page-footer">Revenue Projection Calculator &mdash; For internal use only</div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PAGE 3 — LEAD VALUE
+══════════════════════════════════════════════ -->
+<div class="page" id="page-lead">
+  <div class="page-header">
+    <div class="page-header-tag">Unit Economics</div>
+    <h1>Is this lead worth <em>the money?</em></h1>
+    <p>Calculate LTV, CAC, and your break-even ratio before committing to any acquisition channel.</p>
+  </div>
+  <div class="content-wrap">
+    <div class="lv-layout">
+
+      <div>
+        <div class="card">
+          <div class="card-title">Your Inputs</div>
+          <div class="card-body">
+
+            <div class="field">
+              <div class="lv-slider-top">
+                <span class="lv-slider-label">Average order value (AOV)</span>
+                <span class="lv-slider-val" id="lv-aov-out">$250</span>
+              </div>
+              <input type="range" min="100" max="800" step="10" value="250" id="lv-aov" oninput="lvCalc()">
+            </div>
+
+            <div class="field">
+              <div class="lv-slider-top">
+                <span class="lv-slider-label">Gross margin</span>
+                <span class="lv-slider-val" id="lv-margin-out">30%</span>
+              </div>
+              <input type="range" min="10" max="60" step="1" value="30" id="lv-margin" oninput="lvCalc()">
+            </div>
+
+            <div class="field">
+              <div class="lv-slider-top">
+                <span class="lv-slider-label">Bookings per customer / year</span>
+                <span class="lv-slider-val" id="lv-freq-out">4×</span>
+              </div>
+              <input type="range" min="1" max="20" step="1" value="4" id="lv-freq" oninput="lvCalc()">
+            </div>
+
+            <div class="field">
+              <div class="lv-slider-top">
+                <span class="lv-slider-label">Avg customer lifespan</span>
+                <span class="lv-slider-val" id="lv-lifespan-out">2.5 yrs</span>
+              </div>
+              <input type="range" min="0.5" max="7" step="0.5" value="2.5" id="lv-lifespan" oninput="lvCalc()">
+            </div>
+
+            <hr class="sec">
+
+            <div class="field">
+              <div class="lv-slider-top">
+                <span class="lv-slider-label">Lead-to-booking close rate</span>
+                <span class="lv-slider-val" id="lv-close-out">12%</span>
+              </div>
+              <input type="range" min="1" max="40" step="1" value="12" id="lv-close" oninput="lvCalc()">
+            </div>
+
+            <div class="field">
+              <div class="lv-slider-top">
+                <span class="lv-slider-label">Cost per lead (CPL)</span>
+                <span class="lv-slider-val" id="lv-cpl-out">$18</span>
+              </div>
+              <input type="range" min="2" max="100" step="1" value="18" id="lv-cpl" oninput="lvCalc()">
+            </div>
+
+            <hr class="sec">
+
+            <div class="lv-metrics-grid">
+              <div class="lv-metric"><div class="lv-metric-label">LTV</div><div class="lv-metric-value" id="lv-ltv">—</div><div class="lv-metric-sub">lifetime value</div></div>
+              <div class="lv-metric"><div class="lv-metric-label">CAC</div><div class="lv-metric-value" id="lv-cac">—</div><div class="lv-metric-sub">acquisition cost</div></div>
+              <div class="lv-metric highlight"><div class="lv-metric-label">LTV : CAC</div><div class="lv-metric-value" id="lv-ratio">—</div><div class="lv-metric-sub">target ≥ 3×</div></div>
+              <div class="lv-metric"><div class="lv-metric-label">Payback</div><div class="lv-metric-value" id="lv-payback">—</div><div class="lv-metric-sub">months to break even</div></div>
+              <div class="lv-metric"><div class="lv-metric-label">Max safe CAC</div><div class="lv-metric-value" id="lv-max-cac">—</div><div class="lv-metric-sub">at 3:1 ratio</div></div>
+              <div class="lv-metric"><div class="lv-metric-label">Net profit / customer</div><div class="lv-metric-value" id="lv-profit">—</div><div class="lv-metric-sub">LTV minus CAC</div></div>
+            </div>
+
+            <div class="lv-verdict" id="lv-verdict">
+              <div class="lv-verdict-title" id="lv-verdict-title"></div>
+              <div class="lv-verdict-body" id="lv-verdict-body"></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="lv-explainer">
+        <div class="lv-explainer-card">
+          <h3>The formulas</h3>
+          <div class="lv-formula">
+            <strong>LTV</strong> = AOV × margin × freq × lifespan<br>
+            <strong>CAC</strong> = cost per lead ÷ close rate<br>
+            <strong>Ratio</strong> = LTV ÷ CAC<br>
+            <strong>Payback</strong> = CAC ÷ (AOV × margin × freq ÷ 12)<br>
+            <strong>Max CAC</strong> = LTV ÷ 3
+          </div>
+        </div>
+        <div class="lv-explainer-card">
+          <h3>How to read the ratio</h3>
+          <ul class="lv-rule-list">
+            <li><span class="lv-badge lv-badge-green">3× +</span><span>Healthy. Scale your best acquisition channels confidently.</span></li>
+            <li><span class="lv-badge lv-badge-amber">1.5 – 3×</span><span>Marginal. Profitable, but don't increase spend until the ratio improves.</span></li>
+            <li><span class="lv-badge lv-badge-red">Below 1.5×</span><span>Stop spending. Fix AOV, margin, or close rate before acquiring more leads.</span></li>
+          </ul>
+        </div>
+        <div class="lv-explainer-card">
+          <h3>What moves the needle most</h3>
+          <ul class="lv-rule-list">
+            <li><span style="font-size:12px;color:var(--gold);font-weight:500;flex-shrink:0;">01</span><span>Raising close rate from 8% → 15% cuts your CAC nearly in half — often faster than cutting CPL.</span></li>
+            <li><span style="font-size:12px;color:var(--gold);font-weight:500;flex-shrink:0;">02</span><span>Repeat bookings compound LTV dramatically. Even one extra trip per year can push a marginal ratio into healthy territory.</span></li>
+            <li><span style="font-size:12px;color:var(--gold);font-weight:500;flex-shrink:0;">03</span><span>Low-CPL referral channels (hotel concierge, travel advisors) can produce the same customer at 5–10× lower CAC than paid ads.</span></li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="page-footer">Lead Value Calculator &mdash; For internal use only</div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════ */
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('visible'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('visible');
+  const idx = ['transfer','revenue','lead'].indexOf(name);
+  document.querySelectorAll('.nav-tab')[idx].classList.add('active');
+  localStorage.setItem('suite_active_page', name);
+  // Init chart on first show
+  if (name === 'revenue' && !rpChartInstance) {
+    rpUpdateChart();
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   LOCAL STORAGE HELPERS
+═══════════════════════════════════════════════ */
+function lsSave(key, val) { try { localStorage.setItem(key, val); } catch(e){} }
+function lsGet(key, def) { try { const v = localStorage.getItem(key); return v === null ? def : v; } catch(e){ return def; } }
+
+function saveSlider(id, storageKey) {
+  const el = document.getElementById(id);
+  if (el) { el.value = lsGet(storageKey, el.value); }
+}
+
+/* ─── Transfer Pricing Slider IDs ─── */
+const TP_FIELDS = [
+  ['tp-price','tp_price'], ['tp-driverPct','tp_driverPct'],
+  ['tp-procRate','tp_procRate'], ['tp-procFixed','tp_procFixed'],
+  ['tp-rides','tp_rides'], ['tp-ins1','tp_ins1'], ['tp-ins2','tp_ins2'],
+  ['tp-ins3','tp_ins3'], ['tp-ins4','tp_ins4'],
+  ['tp-lateRate','tp_lateRate'], ['tp-penaltyPct','tp_penaltyPct']
+];
+
+/* ─── Lead Value Slider IDs ─── */
+const LV_FIELDS = [
+  ['lv-aov','lv_aov'], ['lv-margin','lv_margin'], ['lv-freq','lv_freq'],
+  ['lv-lifespan','lv_lifespan'], ['lv-close','lv_close'], ['lv-cpl','lv_cpl']
+];
+
+/* ═══════════════════════════════════════════════
+   TRANSFER PRICING CALCULATOR
+═══════════════════════════════════════════════ */
+function fd(n) { return '$' + Math.abs(n).toFixed(2); }
+function fc(n) { return '$' + Math.abs(Math.round(n)).toLocaleString(); }
+function fp(n) { return n.toFixed(1) + '%'; }
+
+const TP_C = {
+  driver:  '#2C4A7C', proc: '#6B655C', ins: '#5C51A8',
+  late: '#9A6010', profit: '#16653A', loss: '#B5232A'
+};
+
+function tpCalc() {
+  const P          = +document.getElementById('tp-price').value;
+  const dPct       = +document.getElementById('tp-driverPct').value / 100;
+  const procR      = +document.getElementById('tp-procRate').value / 100;
+  const procF      = +document.getElementById('tp-procFixed').value;
+  const ridesY     = +document.getElementById('tp-rides').value;
+  const ins1y      = +document.getElementById('tp-ins1').value;
+  const ins2y      = +document.getElementById('tp-ins2').value;
+  const ins3y      = +document.getElementById('tp-ins3').value;
+  const ins4y      = +document.getElementById('tp-ins4').value;
+  const lateR      = +document.getElementById('tp-lateRate').value / 100;
+  const penaltyPct = +document.getElementById('tp-penaltyPct').value / 100;
+
+  // Save to localStorage
+  TP_FIELDS.forEach(([id, key]) => lsSave(key, document.getElementById(id).value));
+
+  // Display inputs
+  document.getElementById('v-price').textContent      = fd(P);
+  document.getElementById('v-driverPct').textContent  = fp(dPct * 100);
+  document.getElementById('v-procRate').textContent   = fp(procR * 100);
+  document.getElementById('v-procFixed').textContent  = fd(procF);
+  document.getElementById('v-rides').textContent      = Math.round(ridesY).toLocaleString();
+  document.getElementById('v-ins1').textContent       = fc(ins1y) + '/yr';
+  document.getElementById('v-ins2').textContent       = fc(ins2y) + '/yr';
+  document.getElementById('v-ins3').textContent       = fc(ins3y) + '/yr';
+  document.getElementById('v-ins4').textContent       = fc(ins4y) + '/yr';
+  document.getElementById('v-lateRate').textContent   = fp(lateR * 100);
+  document.getElementById('v-penaltyPct').textContent = fp(penaltyPct * 100);
+
+  const ins1r = ins1y/ridesY, ins2r = ins2y/ridesY;
+  const ins3r = ins3y/ridesY, ins4r = ins4y/ridesY;
+  const insTotalY = ins1y+ins2y+ins3y+ins4y;
+  const insTotalR = insTotalY / ridesY;
+
+  document.getElementById('d-ins1').textContent = fd(ins1r)+'/ride';
+  document.getElementById('d-ins2').textContent = fd(ins2r)+'/ride';
+  document.getElementById('d-ins3').textContent = fd(ins3r)+'/ride';
+  document.getElementById('d-ins4').textContent = fd(ins4r)+'/ride';
+  document.getElementById('ins-annual').textContent   = fc(insTotalY);
+  document.getElementById('ins-per-ride').textContent = fd(insTotalR)+' / ride';
+
+  const driverCost = P * dPct;
+  const procCost   = P * procR + procF;
+  const insCost    = insTotalR;
+  const penaltyAmt = driverCost * penaltyPct;
+  const netCostPerIncident = Math.max(0, 2*driverCost - penaltyAmt);
+  const lateReserve = lateR * netCostPerIncident;
+  const totalCosts  = driverCost + procCost + insCost + lateReserve;
+  const gp  = P - totalCosts;
+  const gpm = (gp / P) * 100;
+
+  document.getElementById('s-price').textContent = fd(P);
+  document.getElementById('s-costs').textContent = fd(totalCosts);
+  document.getElementById('s-gp').textContent    = (gp < 0 ? '−' : '') + fd(Math.abs(gp));
+  document.getElementById('s-gpm').textContent   = fp(gpm);
+
+  const gpCell  = document.getElementById('gp-cell');
+  const gpmCell = document.getElementById('gpm-cell');
+  if (gp < 0) {
+    gpCell.className  = 'tp-summary-cell danger';
+    gpmCell.className = 'tp-summary-cell danger';
+  } else {
+    gpCell.className  = 'tp-summary-cell';
+    gpmCell.className = 'tp-summary-cell accent';
+  }
+
+  const items = [
+    { label: 'Driver payout',           amt: driverCost,  color: TP_C.driver },
+    { label: 'Payment processing',      amt: procCost,    color: TP_C.proc   },
+    { label: 'Insurance (all layers)',  amt: insCost,     color: TP_C.ins    },
+    { label: 'Late pick-up reserve',    amt: lateReserve, color: TP_C.late   },
+    { label: 'Gross profit',            amt: gp,          color: gp>=0 ? TP_C.profit : TP_C.loss },
+  ];
+  let wf = '';
+  items.forEach(item => {
+    const pct = Math.max(0, Math.min(100, (Math.abs(item.amt)/P)*100));
+    const sign = item.amt < 0 ? '−' : '';
+    wf += `<div class="wf-row">
+      <span class="wf-label">${item.label}</span>
+      <div class="wf-track"><div class="wf-fill" style="width:${pct.toFixed(1)}%;background:${item.color};"></div></div>
+      <span class="wf-amt" style="color:${item.color};">${sign}${fd(Math.abs(item.amt))}</span>
+      <span class="wf-pct">${fp((item.amt/P)*100)}</span>
+    </div>`;
+  });
+  document.getElementById('waterfall').innerHTML = wf;
+
+  const penaltyLine = penaltyPct > 0
+    ? `A <strong>${fp(penaltyPct*100)}</strong> penalty is deducted from the driver's payout on the late ride (<strong>${fd(penaltyAmt)}</strong>), partially offsetting cost.`
+    : `No penalty is configured — the full 2× driver payout is absorbed.`;
+  document.getElementById('incident-desc').innerHTML =
+    `<strong>Current ride:</strong> Driver is paid <strong>${fd(driverCost)}</strong>. Customer is fully refunded <strong>${fd(P)}</strong>. No revenue.<br>
+     <strong>Next ride:</strong> Customer rides free. Driver paid <strong>${fd(driverCost)}</strong> again. No revenue.<br>
+     <strong>Gross cost per incident:</strong> <strong>${fd(2*driverCost)}</strong>. ${penaltyLine} Net cost: <strong>${fd(netCostPerIncident)}</strong>.`;
+}
+
+/* ═══════════════════════════════════════════════
+   REVENUE PROJECTION CALCULATOR
+═══════════════════════════════════════════════ */
+const rpPhases = [
+  { label:'Year 1', sublabel:'Foundation', cities:4,  drivers:8,  ridesDay:2,   aov:120, take:15 },
+  { label:'Year 2', sublabel:'Expansion',  cities:12, drivers:15, ridesDay:3,   aov:135, take:17 },
+  { label:'Year 3', sublabel:'Scale',      cities:28, drivers:25, ridesDay:3,   aov:150, take:20 }
+];
+
+const rpSliderDefs = [
+  { key:'cities',   label:'Cities active',         prefix:'',  suffix:'',  min:1,   max:[40,80,120],    step:1 },
+  { key:'drivers',  label:'Drivers per city',       prefix:'',  suffix:'',  min:1,   max:[60,100,200],   step:1 },
+  { key:'ridesDay', label:'Rides / driver / day',   prefix:'',  suffix:'',  min:0.5, max:[8,8,12],       step:0.5 },
+  { key:'aov',      label:'Average booking value',  prefix:'$', suffix:'',  min:50,  max:[500,500,600],  step:5 },
+  { key:'take',     label:'Platform take rate',     prefix:'',  suffix:'%', min:8,   max:[30,30,30],     step:0.5 }
+];
+
+function rpCalc(p) {
+  const totalDrivers = p.cities * p.drivers;
+  const annualRides  = totalDrivers * p.ridesDay * 365;
+  const gmv = annualRides * p.aov;
+  const rev = gmv * (p.take / 100);
+  return { totalDrivers, annualRides, gmv, rev };
+}
+function rpFmt(n) {
+  if (n>=1e9) return '$'+(n/1e9).toFixed(2)+'B';
+  if (n>=1e6) return '$'+(n/1e6).toFixed(1)+'M';
+  if (n>=1e3) return '$'+Math.round(n/1e3)+'K';
+  return '$'+Math.round(n).toLocaleString();
+}
+function rpFmtShort(n) {
+  if (n>=1e9) return '$'+(n/1e9).toFixed(1)+'B';
+  if (n>=1e6) return '$'+(n/1e6).toFixed(1)+'M';
+  if (n>=1e3) return '$'+Math.round(n/1e3)+'K';
+  return '$'+Math.round(n);
+}
+function rpFmtNum(n) {
+  if (n>=1e6) return (n/1e6).toFixed(1)+'M';
+  if (n>=1e3) return Math.round(n/1e3)+'K';
+  return Math.round(n).toLocaleString();
+}
+
+function rpBuildSliders(i) {
+  const p = rpPhases[i];
+  const container = document.getElementById('rp-sliders-'+i);
+  container.innerHTML = rpSliderDefs.map(def => {
+    const max = Array.isArray(def.max) ? def.max[i] : def.max;
+    const v = p[def.key];
+    const display = def.prefix + v + def.suffix;
+    return `<div class="rp-slider-row">
+      <div class="rp-slider-top">
+        <span class="rp-slider-name">${def.label}</span>
+        <span class="rp-slider-val" id="rp-sv-${i}-${def.key}">${display}</span>
+      </div>
+      <input type="range" min="${def.min}" max="${max}" value="${v}" step="${def.step}"
+        id="rp-sl-${i}-${def.key}" oninput="rpOnSlide(${i},'${def.key}',this.value)">
+      <div class="range-labels"><span>${def.prefix}${def.min}${def.suffix}</span><span>${def.prefix}${max}${def.suffix}</span></div>
+    </div>`;
+  }).join('');
+  // restore from LS
+  rpSliderDefs.forEach(def => {
+    const lsKey = `rp_phase${i}_${def.key}`;
+    const saved = lsGet(lsKey, null);
+    if (saved !== null) {
+      rpPhases[i][def.key] = parseFloat(saved);
+      const el = document.getElementById(`rp-sl-${i}-${def.key}`);
+      if (el) el.value = saved;
+      const display = def.prefix + (Number.isInteger(parseFloat(saved)) ? Math.round(saved) : parseFloat(saved).toFixed(1)) + def.suffix;
+      const vEl = document.getElementById(`rp-sv-${i}-${def.key}`);
+      if (vEl) vEl.textContent = display;
+    }
+  });
+}
+
+function rpUpdateMetrics(i) {
+  const p = rpPhases[i];
+  const r = rpCalc(p);
+  document.getElementById('rp-m-rev-'+i).textContent = rpFmt(r.rev);
+  document.getElementById('rp-m-rev-sub-'+i).textContent = p.take+'% of GMV · '+rpFmtNum(r.annualRides)+' rides';
+  document.getElementById('rp-m-gmv-'+i).textContent = rpFmt(r.gmv);
+  document.getElementById('rp-m-gmv-sub-'+i).textContent = p.cities+' cities · '+rpFmtNum(r.totalDrivers)+' total drivers';
+  document.getElementById('rp-m-drv-'+i).textContent = rpFmtNum(r.totalDrivers);
+  document.getElementById('rp-m-rds-'+i).textContent = rpFmtNum(r.annualRides);
+  document.getElementById('rp-tab-rev-'+i).textContent = rpFmtShort(r.rev)+' revenue';
+}
+
+function rpUpdateSummary() {
+  const grid = document.getElementById('rp-summary-cards');
+  grid.innerHTML = rpPhases.map((p,i) => {
+    const r = rpCalc(p);
+    return `<div class="rp-sum-card">
+      <div class="rp-sum-year">Phase ${i+1}</div>
+      <div class="rp-sum-phase">${p.label} — ${p.sublabel}</div>
+      <div class="rp-sum-rev">${rpFmt(r.rev)}</div>
+      <div class="rp-sum-gmv">GMV ${rpFmt(r.gmv)}</div>
+      <div class="rp-sum-stats">
+        <div class="rp-sum-stat"><span class="rp-sum-stat-k">Cities</span><span class="rp-sum-stat-v">${p.cities}</span></div>
+        <div class="rp-sum-stat"><span class="rp-sum-stat-k">Total drivers</span><span class="rp-sum-stat-v">${rpFmtNum(r.totalDrivers)}</span></div>
+        <div class="rp-sum-stat"><span class="rp-sum-stat-k">Annual rides</span><span class="rp-sum-stat-v">${rpFmtNum(r.annualRides)}</span></div>
+        <div class="rp-sum-stat"><span class="rp-sum-stat-k">Avg booking value</span><span class="rp-sum-stat-v">$${p.aov}</span></div>
+        <div class="rp-sum-stat"><span class="rp-sum-stat-k">Take rate</span><span class="rp-sum-stat-v">${p.take}%</span></div>
+      </div>
+    </div>`;
+  }).join('');
+  rpUpdateChart();
+}
+
+let rpChartInstance;
+function rpUpdateChart() {
+  const labels = rpPhases.map(p => p.label);
+  const gmvs   = rpPhases.map(p => parseFloat((rpCalc(p).gmv/1e6).toFixed(2)));
+  const revs   = rpPhases.map(p => parseFloat((rpCalc(p).rev/1e6).toFixed(2)));
+  const style  = getComputedStyle(document.documentElement);
+  const green  = style.getPropertyValue('--green').trim();
+  const greenL = style.getPropertyValue('--green-light').trim();
+  if (!rpChartInstance) {
+    rpChartInstance = new Chart(document.getElementById('rp-chart'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label:'GMV', data:gmvs, backgroundColor:greenL, borderRadius:4 },
+          { label:'Platform revenue', data:revs, backgroundColor:green, borderRadius:4 }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend:{ display:false }, tooltip:{
+          callbacks:{ label: ctx => ' $'+ctx.parsed.y.toFixed(1)+'M' }
+        }},
+        scales: {
+          x: { grid:{ display:false }, ticks:{ font:{ family:"'DM Sans',sans-serif", size:12 }, color:'#78716C' }, border:{ color:'#E2DDD6' } },
+          y: { grid:{ color:'#F5F2EC' }, border:{ dash:[3,3], color:'transparent' },
+            ticks:{ font:{ family:"'DM Mono',monospace", size:11 }, color:'#78716C', callback:v=>'$'+v+'M' } }
+        }
+      }
+    });
+  } else {
+    rpChartInstance.data.datasets[0].data = gmvs;
+    rpChartInstance.data.datasets[1].data = revs;
+    rpChartInstance.update('none');
+  }
+}
+
+function rpOnSlide(i, key, raw) {
+  const def = rpSliderDefs.find(d => d.key === key);
+  const v = parseFloat(raw);
+  rpPhases[i][key] = v;
+  lsSave(`rp_phase${i}_${key}`, raw);
+  const display = def.prefix + (Number.isInteger(v) ? v : v.toFixed(1)) + def.suffix;
+  document.getElementById('rp-sv-'+i+'-'+key).textContent = display;
+  rpUpdateMetrics(i);
+  rpUpdateSummary();
+}
+
+function rpSwitchPhase(idx) {
+  document.querySelectorAll('.rp-phase-tab').forEach((t,i) => t.classList.toggle('active', i===idx));
+  document.querySelectorAll('.rp-phase-body').forEach((b,i) => b.classList.toggle('visible', i===idx));
+}
+
+/* ═══════════════════════════════════════════════
+   LEAD VALUE CALCULATOR
+═══════════════════════════════════════════════ */
+function lvFmt(n) { return '$'+Math.round(n).toLocaleString(); }
+function lvFmtX(n) { return n.toFixed(1)+'×'; }
+
+function lvCalc() {
+  const aov      = +document.getElementById('lv-aov').value;
+  const margin   = +document.getElementById('lv-margin').value / 100;
+  const freq     = +document.getElementById('lv-freq').value;
+  const lifespan = +document.getElementById('lv-lifespan').value;
+  const close    = +document.getElementById('lv-close').value / 100;
+  const cpl      = +document.getElementById('lv-cpl').value;
+
+  LV_FIELDS.forEach(([id,key]) => lsSave(key, document.getElementById(id).value));
+
+  document.getElementById('lv-aov-out').textContent      = '$'+aov;
+  document.getElementById('lv-margin-out').textContent   = document.getElementById('lv-margin').value+'%';
+  document.getElementById('lv-freq-out').textContent     = freq+'×';
+  document.getElementById('lv-lifespan-out').textContent = lifespan+' yrs';
+  document.getElementById('lv-close-out').textContent    = document.getElementById('lv-close').value+'%';
+  document.getElementById('lv-cpl-out').textContent      = '$'+cpl;
+
+  const ltv        = aov*margin*freq*lifespan;
+  const cac        = cpl/close;
+  const ratio      = ltv/cac;
+  const grossPerMo = (aov*margin*freq)/12;
+  const payback    = cac/grossPerMo;
+  const maxCac     = ltv/3;
+  const profit     = ltv-cac;
+
+  document.getElementById('lv-ltv').textContent     = lvFmt(ltv);
+  document.getElementById('lv-cac').textContent     = lvFmt(cac);
+  document.getElementById('lv-ratio').textContent   = lvFmtX(ratio);
+  document.getElementById('lv-payback').textContent = Math.round(payback)+' mo';
+  document.getElementById('lv-max-cac').textContent = lvFmt(maxCac);
+  document.getElementById('lv-profit').textContent  = lvFmt(profit);
+
+  const box   = document.getElementById('lv-verdict');
+  const title = document.getElementById('lv-verdict-title');
+  const body  = document.getElementById('lv-verdict-body');
+
+  box.className = 'lv-verdict';
+  if (ratio >= 3) {
+    box.classList.add('green');
+    title.textContent = 'Profitable — this lead is worth buying';
+    body.textContent  = 'Your ratio is '+lvFmtX(ratio)+', above the 3× minimum. You generate '+lvFmt(profit)+' net profit per customer and recoup acquisition cost in '+Math.round(payback)+' months. You can safely spend up to '+lvFmt(maxCac)+' per customer acquired.';
+  } else if (ratio >= 1.5) {
+    box.classList.add('amber');
+    title.textContent = 'Marginal — improve before scaling';
+    body.textContent  = 'Your ratio is '+lvFmtX(ratio)+'. You\'re profitable but not efficiently. Don\'t scale spend until you hit 3×. Lower CPL through better channels, raise AOV, or improve close rate. At 3:1, your max safe CAC would be '+lvFmt(maxCac)+'.';
+  } else {
+    box.classList.add('red');
+    title.textContent = 'Losing money — do not scale';
+    body.textContent  = 'Your ratio is '+lvFmtX(ratio)+'. You\'re spending '+lvFmt(cac-ltv)+' more per customer than they generate. Fix margin, retention, or close rate before buying more leads.';
+  }
+
+  // Update slider fill color
+  document.querySelectorAll('#page-lead input[type=range]').forEach(input => {
+    const pct = ((input.value-input.min)/(input.max-input.min))*100;
+    input.style.background = `linear-gradient(to right, var(--gold-mid) ${pct}%, var(--border) ${pct}%)`;
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   INIT — LOAD FROM LOCAL STORAGE
+═══════════════════════════════════════════════ */
+(function init() {
+  // Restore Transfer Pricing values
+  TP_FIELDS.forEach(([id, key]) => {
+    const el = document.getElementById(id);
+    if (el) {
+      const saved = lsGet(key, null);
+      if (saved !== null) el.value = saved;
+    }
+  });
+
+  // Restore Lead Value values
+  LV_FIELDS.forEach(([id, key]) => {
+    const el = document.getElementById(id);
+    if (el) {
+      const saved = lsGet(key, null);
+      if (saved !== null) el.value = saved;
+    }
+  });
+
+  // Build Revenue Projection sliders (which also restores from LS)
+  rpPhases.forEach((_, i) => { rpBuildSliders(i); rpUpdateMetrics(i); });
+  rpUpdateSummary();
+
+  // Run initial calculations
+  tpCalc();
+  lvCalc();
+
+  // Restore last active page
+  const lastPage = lsGet('suite_active_page', 'transfer');
+  showPage(lastPage);
+})();
+</script>
+</body>
+</html>
